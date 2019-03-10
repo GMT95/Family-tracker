@@ -14,7 +14,7 @@ export class SignInScreen extends Component {
     super(props);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.getLocationAsync();
   }
 

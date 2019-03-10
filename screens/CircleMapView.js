@@ -2,13 +2,14 @@ import React, { Component } from 'react'
 import { View, Text,Dimensions,StyleSheet } from 'react-native'
 import { connect } from 'react-redux'
 import { Button } from 'react-native-paper'
-import { MapView,Constants } from 'expo'
+import { MapView,Location,Permissions } from 'expo'
 import firebase from '../config/firebase';
 import { Avatar,ActivityIndicator } from 'react-native-paper'
 const Database = firebase.database();
 const width = Dimensions.get('window').width
 const height = Dimensions.get('window').height
 
+const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 };
 
 class CircleMapView extends Component {
   state = {
@@ -42,7 +43,21 @@ class CircleMapView extends Component {
     //     console.log(userLocations, 'user location in circle map view');
     //   })     
     console.log(circleData.members, 'Circle data members')
-    Database.ref().child('users').on('value', snapshot => {
+
+    Database.ref().child('users').once('value').then(snapshot => {
+      let data = snapshot.val();
+      let userLocs = [];
+      console.log(data);
+      for (let i in data) {
+        if (circleData.members.includes(data[i].id)) {
+          userLocs.push(data[i]);
+          console.log('User Locations', userLocs);
+          this.setState({ userLocs })
+        }
+      }
+    })
+
+    Database.ref().child('users').on('child_changed', snapshot => {
       let data = snapshot.val();
       let userLocs = [];
       console.log(data);
@@ -56,16 +71,43 @@ class CircleMapView extends Component {
     })
   }
 
+  async getLocationAsync() {
+    console.log('In get location async')
+    let { status } = await Permissions.askAsync(Permissions.LOCATION)
+      .catch(e => console.log('An error occured', e));
+    if (status !== 'granted') {
+      // this.setState({
+      //   errorMessage: '',
+      // });
+      this.showAlert()
+    }
+
+    Location.watchPositionAsync(GEOLOCATION_OPTIONS, this.locationChanged);
+  };
+
+  locationChanged = (location) => {
+    const {savedData} = this.props
+    console.log('In watch position async')
+    region = {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      latitudeDelta: 0.1,
+      longitudeDelta: 0.05,
+    },
+    console.log('location',location)
+    Database.ref(`users/${savedData.id}`).update({latitude: location.coords.latitude,longitude: location.coords.longitude})
+}
+
 
   componentDidMount() {
     this.fetchUserLocations()
+    this.getLocationAsync()
   }
 
   render() {
     console.log(this.props.circleData)
     const { showKey, userLocs } = this.state
     const { circleData, currentLocation } = this.props
-    //console.log('User data remove after use',currentLocation)
     return (
       <View style={{flex: 1}}>
         {circleData.isOwner && <View>
@@ -88,8 +130,9 @@ class CircleMapView extends Component {
               }}
             >
                {
-                userLocs.map((val) =>
+                userLocs.map((val,index) =>
                   <MapView.Marker
+                    key={`index${index}`}
                     coordinate={{
                       latitude: val.latitude,
                       longitude: val.longitude,
@@ -106,7 +149,6 @@ class CircleMapView extends Component {
              </MapView> :
              <ActivityIndicator size="large" color="aqua"  style={{marginTop: 25}}/>
           }
-          <Text>Hello</Text>
         </View>
 
       </View>
@@ -116,7 +158,8 @@ class CircleMapView extends Component {
 
 const mapStateToProps = (state) => ({
   circleData: state.authReducer.circleData,
-  currentLocation: state.authReducer.currentLocation
+  currentLocation: state.authReducer.currentLocation,
+  savedData: state.authReducer.savedData
 })
 
 const mapDispatchToProps = {
