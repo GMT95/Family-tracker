@@ -47,11 +47,11 @@ export class JoinCircle extends Component {
       .then(res => res.json())
       .then(res2 => {
         membersArray = res2.members
-        membersLocArray = res2.membersLoc
-        console.log(membersLocArray,'membersLocArray');
+        //membersLocArray = res2.membersLoc
+        //console.log(membersLocArray,'membersLocArray');
         membersArray.push(savedData.id)
-        membersLocArray.push({id: savedData.id,longitude: currentLocation.longitude,latitude: currentLocation.latitude})
-        Database.ref(`circles/${val.key}`).update({members: membersArray,membersLoc: membersLocArray})
+        //membersLocArray.push({id: savedData.id,longitude: currentLocation.longitude,latitude: currentLocation.latitude})
+        Database.ref(`circles/${val.key}`).update({members: membersArray})
       })
       .then(() => this.props.navigation.navigate('Home'))
     } else {

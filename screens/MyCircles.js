@@ -3,8 +3,10 @@ import { View, Text } from 'react-native'
 import PropTypes from 'prop-types'
 import { AntDesign } from '@expo/vector-icons';
 import { connect } from 'react-redux'
-import { Avatar, Button, Card, Title, Paragraph, ActivityIndicator } from 'react-native-paper';
+import { Avatar, Button, Card, Title, Paragraph, ActivityIndicator, DarkTheme } from 'react-native-paper';
 import lodash from 'lodash'
+import firebase from '../config/firebase'
+const Database = firebase.database()
 
 export class MyCircles extends Component {
   static navigationOptions = {
@@ -19,14 +21,14 @@ export class MyCircles extends Component {
     userCircles: []
   }
 
-  componentDidMount() {
+  fetchData() {
     const { savedData } = this.props
     fetch(`https://family-gps-tracker-80ce7.firebaseio.com/circles.json`)
       .then(res => res.json())
       //.then(res2 => console.log(lodash.values(res2)))
       //.then(res2 => this.setState({ userCircles: lodash.values(res2) }))
       .then(data => {
-        console.log(data)
+        console.log('data',data)
         let userCircles = [];
         for (let i in data) {
           if (data[i].ownerId === savedData.id) {
@@ -39,6 +41,10 @@ export class MyCircles extends Component {
         this.setState({ userCircles })
         console.log(userCircles);
       })
+  }
+
+  componentDidMount() {
+    this.fetchData()
   }
 
   openCircleView(val) {

@@ -98,7 +98,7 @@ const AppStack = createStackNavigator({
           icon="exit-to-app"
           color='white'
           size={25}
-          onPress={() => navigation.navigate('Auth')}
+          onPress={() => navigation.navigate('Auth',{render: "again"})}
         />
       )
     })

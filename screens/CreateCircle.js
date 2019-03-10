@@ -6,7 +6,7 @@ import { TextInput,Button } from 'react-native-paper';
 import {Constants} from 'expo'
 import firebase from '../config/firebase'
 const Database = firebase.database();
-import { fetchData } from '../redux/actions/realTimeAction'
+
 
 class CreateCircle extends Component {
   static navigationOptions = {
@@ -32,13 +32,14 @@ class CreateCircle extends Component {
       ownerId: savedData.id,
       joinCode: joinCode, 
       ownerProfilePic: savedData.picture.data.url,
-      members: [savedData.id],
-      membersLoc: [{
-            id: userId,
-            longitude: currentLocation.longitude,
-            latitude: currentLocation.latitude
+      // members: [savedData.id],
+      // membersLoc: [{
+      //       id: userId,
+      //       longitude: currentLocation.longitude,
+      //       latitude: currentLocation.latitude
           
-      }]
+      // }]
+      members: [userId]
     }).then(_ => {
       this.setState({circleName: '',joinCode: ''})
       this.props.navigation.navigate('Home')
@@ -62,10 +63,6 @@ class CreateCircle extends Component {
           mode="contained"
           onPress={() => this.addCircleToDb()}
         >Create</Button>
-        <Button
-          mode="contained"
-          onPress={() => this.props.fetchData()}
-        >Fetch Data from Firebase</Button>
       </View>
     )
   }
@@ -77,7 +74,7 @@ const mapStateToProps = (state) => ({
 })
 
 
-export default connect(mapStateToProps, {fetchData})(CreateCircle)
+export default connect(mapStateToProps, null)(CreateCircle)
 
 const styles = StyleSheet.create({
   containerStart: {

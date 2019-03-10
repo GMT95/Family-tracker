@@ -91,7 +91,7 @@ class HomeScreen extends Component {
     return (
       location === '' ?
       <ActivityIndicator size="large" color="#0000ff" /> :
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1}}>
         <MapView
           style={{ flex: 1 }}
           // initialRegion={{
